@@ -120,7 +120,7 @@ func Await(event *Value, resume *BasicBlock) *Terminator {
 var Unreachable *Terminator
 
 // AppendSuccessors appends to the given slice any successors for the recieving
-// block. Pass a nil slice to force this function to allocate a new backing
+// terminator. Pass a nil slice to force this function to allocate a new backing
 // array and return it, or pre-allocate a buffer in the caller.
 //
 // Most terminators have no more than two successors, so passing a slice with
@@ -153,6 +153,19 @@ func (t *Terminator) AppendSuccessors(to []*BasicBlock) []*BasicBlock {
 			// Indicates an incorrectly-constructed terminator
 			panic("AppendSuccessors with non-terminator operation")
 		}
+	}
+}
+
+// AddSuccessors adds to the given set any successors for the receiving
+// terminator, in-place.
+func (t *Terminator) AddSuccessors(to BasicBlockSet) {
+	// For now we're going to implement this in terms of AppendSuccessors, which
+	// requires us to allocate a backing array for this slice. We may wish to
+	// rework this later to remove this allocation if it proves to be troublesome
+	// after profiling.
+	succs := t.AppendSuccessors(nil)
+	for _, block := range succs {
+		to.Add(block)
 	}
 }
 
