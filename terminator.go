@@ -128,23 +128,30 @@ var Unreachable *Terminator
 // some terminators have no successors at all, so passing nil can mean avoiding
 // allocation altogether in those cases.
 func (t *Terminator) AppendSuccessors(to []*BasicBlock) []*BasicBlock {
+	b := basicBlockSliceBuilder{&to}
+	t.AddSuccessors(&b)
+	return to
+}
+
+// AddSuccessors adds to the given set any successors for the receiving
+// terminator, in-place.
+func (t *Terminator) AddSuccessors(to BasicBlockAdder) {
 	// This switch must cover all of the ops that are considered to be
 	// terminator operations by op.Terminator.
 	switch t.op {
 	case OpJump:
-		return append(to, t.args[0].Block)
+		to.Add(t.args[0].Block)
 	case OpBranch:
-		return append(to, t.args[0].Block, t.args[1].Block)
+		to.Add(t.args[0].Block)
+		to.Add(t.args[1].Block)
 	case OpSwitch:
-		ret := to
 		for _, arg := range t.args {
-			ret = append(ret, arg.Block)
+			to.Add(arg.Block)
 		}
-		return ret
 	case OpReturn, OpUnreachable:
-		return to // no successors
+		return // no successors
 	case OpYield, OpAwait:
-		return append(to, t.args[0].Block)
+		to.Add(t.args[0].Block)
 	default:
 		if t.op.Terminator() {
 			// Indicates we're missing a case above
@@ -153,19 +160,6 @@ func (t *Terminator) AppendSuccessors(to []*BasicBlock) []*BasicBlock {
 			// Indicates an incorrectly-constructed terminator
 			panic("AppendSuccessors with non-terminator operation")
 		}
-	}
-}
-
-// AddSuccessors adds to the given set any successors for the receiving
-// terminator, in-place.
-func (t *Terminator) AddSuccessors(to BasicBlockSet) {
-	// For now we're going to implement this in terms of AppendSuccessors, which
-	// requires us to allocate a backing array for this slice. We may wish to
-	// rework this later to remove this allocation if it proves to be troublesome
-	// after profiling.
-	succs := t.AppendSuccessors(nil)
-	for _, block := range succs {
-		to.Add(block)
 	}
 }
 

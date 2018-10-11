@@ -11,7 +11,7 @@ type BasicBlock struct {
 
 // AddSuccessors adds the successors of this block to the given set, modifying
 // it in-place.
-func (b *BasicBlock) AddSuccessors(to BasicBlockSet) {
+func (b *BasicBlock) AddSuccessors(to BasicBlockAdder) {
 	b.Terminator.AddSuccessors(to)
 }
 
