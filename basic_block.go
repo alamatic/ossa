@@ -9,6 +9,10 @@ type BasicBlock struct {
 	Terminator   *Terminator
 }
 
+func NewBasicBlock() *BasicBlock {
+	return &BasicBlock{}
+}
+
 // AddSuccessors adds the successors of this block to the given set, modifying
 // it in-place.
 func (b *BasicBlock) AddSuccessors(to BasicBlockAdder) {
