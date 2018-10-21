@@ -4,15 +4,20 @@ import (
 	"github.com/alamatic/ossa"
 )
 
-// AllPredecessors calculates the predecessors for the given block and all
+// PredecessorsTable is a map from each basic block to the set of basic blocks
+// that are its predecessors. A PredecessorsTable can be constructed by calling
+// FindPredecessors.
+type PredecessorsTable map[*ossa.BasicBlock]ossa.BasicBlockSet
+
+// FindPredecessors calculates the predecessors for the given block and all
 // blocks reachable from it, by inverting all of the "successor" edges
 // implied by the block terminators.
 //
 // The result is a map from each block to its predecessors. Each reachable
 // block must have at least one predecessor by definition, since otherwise
 // it would not be reachable.
-func AllPredecessors(start *ossa.BasicBlock) map[*ossa.BasicBlock]ossa.BasicBlockSet {
-	ret := make(map[*ossa.BasicBlock]ossa.BasicBlockSet)
+func FindPredecessors(start *ossa.BasicBlock) PredecessorsTable {
+	ret := make(PredecessorsTable)
 	seen := make(ossa.BasicBlockSet)
 
 	q := newBlockLIFO(6)

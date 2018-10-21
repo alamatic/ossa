@@ -3,6 +3,17 @@ package ossa
 // BasicBlockSet is a data structure for a set of basic blocks.
 type BasicBlockSet map[*BasicBlock]struct{}
 
+// NewBasicBlockSet is a helper for constructing a basic block set with an
+// initial set of members. It is also valid to construct an empty set with
+// the "make" function.
+func NewBasicBlockSet(blocks ...*BasicBlock) BasicBlockSet {
+	ret := make(BasicBlockSet)
+	for _, b := range blocks {
+		ret.Add(b)
+	}
+	return ret
+}
+
 // Has returns true only if the given block is in the set.
 func (s BasicBlockSet) Has(block *BasicBlock) bool {
 	_, ok := s[block]
@@ -51,6 +62,14 @@ func (s BasicBlockSet) AppendBlocks(to []*BasicBlock) []*BasicBlock {
 		to = append(to, v)
 	}
 	return to
+}
+
+// AddBlocksTo adds to the given adder all of the blocks in the set in a
+// non-deterministic order.
+func (s BasicBlockSet) AddBlocksTo(to BasicBlockAdder) {
+	for v := range s {
+		to.Add(v)
+	}
 }
 
 // ValueSet is a data structure for a set of values.
